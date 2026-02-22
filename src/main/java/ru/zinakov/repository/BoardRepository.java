@@ -16,4 +16,16 @@ public class BoardRepository {
             em.merge(board);
         }
     }
+
+    public Board findWithDetails(EntityManager em, Long id) {
+        return em.createQuery("""
+                select distinct b
+                from Board b
+                left join fetch b.columns c
+                left join fetch c.cards
+                where b.id = :id
+                """, Board.class)
+                .setParameter("id", id)
+                .getSingleResult();
+    }
 }

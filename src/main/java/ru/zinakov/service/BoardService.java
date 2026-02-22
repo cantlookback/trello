@@ -9,6 +9,9 @@ import ru.zinakov.exception.BadRequestException;
 import ru.zinakov.exception.NotFoundException;
 import ru.zinakov.repository.BoardRepository;
 import ru.zinakov.util.JpaUtil;
+import ru.zinakov.web.dto.BoardResponse;
+import ru.zinakov.web.dto.CardResponse;
+import ru.zinakov.web.dto.ColumnResponse;
 
 public class BoardService {
     private final BoardRepository repository = new BoardRepository();
@@ -58,23 +61,63 @@ public class BoardService {
         }
     }
 
-    public Board getBoard(ServletContext context, Long id) {
+    /*
+     * public Board getBoard(ServletContext context, Long id) {
+     * try (EntityManager em = JpaUtil.getEntityManager(context)) {
+     * 
+     * em.getTransaction().begin();
+     * 
+     * Board board = em.find(Board.class, id);
+     * if (board == null) {
+     * throw new NotFoundException("Board not found");
+     * }
+     * 
+     * board.getColumns().size();
+     * board.getColumns().forEach(c -> c.getCards().size());
+     * 
+     * em.getTransaction().commit();
+     * 
+     * return board;
+     * }
+     * }
+     */
+
+    public BoardResponse getBoard(ServletContext context, Long id) {
         try (EntityManager em = JpaUtil.getEntityManager(context)) {
 
-            em.getTransaction().begin();
+            Board board = repository.findWithDetails(em, id);
 
-            Board board = em.find(Board.class, id);
             if (board == null) {
                 throw new NotFoundException("Board not found");
             }
 
-            board.getColumns().size();
-            board.getColumns().forEach(c -> c.getCards().size());
-
-            em.getTransaction().commit();
-
-            return board;
+            return mapToResponse(board);
         }
+    }
+
+    private BoardResponse mapToResponse(Board board) {
+        BoardResponse br = new BoardResponse();
+        br.id = board.getId();
+        br.name = board.getName();
+
+        br.columns = board.getColumns().stream()
+                .map(c -> {
+                    ColumnResponse cr = new ColumnResponse();
+                    cr.id = c.getId();
+                    cr.title = c.getTitle();
+
+                    cr.cards = c.getCards().stream()
+                            .map(card -> {
+                                CardResponse cardResp = new CardResponse();
+                                cardResp.id = card.getId();
+                                cardResp.title = card.getTitle();
+                                return cardResp;
+                            }).toList();
+
+                    return cr;
+                }).toList();
+
+        return br;
     }
 
     public void deleteBoard(ServletContext context, Long id) {

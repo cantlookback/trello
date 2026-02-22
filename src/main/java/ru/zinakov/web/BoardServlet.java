@@ -8,13 +8,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.zinakov.domain.Board;
 import ru.zinakov.exception.BadRequestException;
 import ru.zinakov.exception.NotFoundException;
 import ru.zinakov.service.BoardService;
 import ru.zinakov.web.dto.BoardResponse;
-import ru.zinakov.web.dto.CardResponse;
-import ru.zinakov.web.dto.ColumnResponse;
 import ru.zinakov.web.dto.CreateBoardRequest;
 import ru.zinakov.web.dto.CreateCardRequest;
 import ru.zinakov.web.dto.CreateColumnRequest;
@@ -40,10 +37,7 @@ public class BoardServlet extends HttpServlet {
         if (parts.length == 2) {
             Long boardId = Long.valueOf(parts[1]);
 
-            Board board = service.getBoard(
-                    getServletContext(), boardId);
-
-            BoardResponse response = toResponse(board);
+            BoardResponse response = service.getBoard(getServletContext(), boardId);
 
             resp.setContentType("application/json");
             mapper.writeValue(resp.getOutputStream(), response);
@@ -51,30 +45,6 @@ public class BoardServlet extends HttpServlet {
         }
 
         throw new NotFoundException("Invalid path");
-    }
-
-    private BoardResponse toResponse(Board board) {
-
-        BoardResponse br = new BoardResponse();
-        br.id = board.getId();
-        br.name = board.getName();
-
-        br.columns = board.getColumns().stream().map(column -> {
-            ColumnResponse cr = new ColumnResponse();
-            cr.id = column.getId();
-            cr.title = column.getTitle();
-
-            cr.cards = column.getCards().stream().map(card -> {
-                CardResponse cardResp = new CardResponse();
-                cardResp.id = card.getId();
-                cardResp.title = card.getTitle();
-                return cardResp;
-            }).toList();
-
-            return cr;
-        }).toList();
-
-        return br;
     }
 
     @Override
