@@ -114,9 +114,9 @@ mvn test
 
 Тесты:
 
-- Проверяют создание Board
-- Проверяют добавление Column
-- Проверяют добавление Card
+- Проверяют создание `Board`
+- Проверяют добавление `Column`
+- Проверяют добавление `Card`
 - Проверяют каскады и связи
 
 Для тестов используется отдельный `persistence.xml` в `src/test/resources`.
@@ -132,14 +132,14 @@ mvn test
 
 ### JPA / Hibernate
 
-- @Entity
-- @OneToMany / @ManyToOne
-- CascadeType
-- orphanRemoval
+- `@Entity`
+- `@OneToMany` / `@ManyToOne`
+- `CascadeType`
+- `orphanRemoval`
 - Транзакции
 - Persistence Context
 - LAZY vs EAGER
-- hbm2ddl
+- `hbm2ddl`
 
 ### Тестирование
 
