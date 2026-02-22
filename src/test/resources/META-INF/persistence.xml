@@ -12,13 +12,13 @@
                 value="jdbc:postgresql://localhost:5432/trello" />
             <property name="jakarta.persistence.jdbc.user" value="trello" />
             <property name="jakarta.persistence.jdbc.password" value="trello" />
+            <property name="hibernate.hbm2ddl.auto" value="create-drop" />
             <property name="jakarta.persistence.jdbc.driver"
                 value="org.postgresql.Driver" />
 
             <property name="hibernate.dialect"
                 value="org.hibernate.dialect.PostgreSQLDialect" />
 
-            <property name="hibernate.hbm2ddl.auto" value="update" />
             <property name="hibernate.show_sql" value="true" />
 
         </properties>

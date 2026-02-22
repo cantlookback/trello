@@ -43,7 +43,15 @@ public class Board {
         return id;
     }
 
+    public String getName(){
+        return name;
+    }
+
     public List<BoardColumn> getColumns(){
         return this.columns;
+    }
+
+    public void setColumns(List<BoardColumn> columns) {
+        this.columns = columns;
     }
 }

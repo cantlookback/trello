@@ -28,6 +28,18 @@ public class Card {
         this.title = title;
     }
 
+    public Long getId(){
+        return id;
+    }
+
+    public String getTitle(){
+        return title;
+    }
+
+    public BoardColumn getColumn(){
+        return column;
+    }
+
     public void setColumn(BoardColumn column) {
         this.column = column;
     }

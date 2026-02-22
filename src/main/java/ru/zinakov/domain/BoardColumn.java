@@ -52,4 +52,20 @@ public class BoardColumn {
     public Long getId() {
         return id;
     }
+
+    public List<Card> getCards(){
+        return cards;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setCards(List<Card> cards) {
+        this.cards = cards;
+    }
 }
