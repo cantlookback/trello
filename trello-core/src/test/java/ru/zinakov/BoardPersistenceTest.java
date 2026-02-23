@@ -45,7 +45,7 @@ public class BoardPersistenceTest {
             Board fromDb = em.find(Board.class, id);
 
             assertNotNull(fromDb);
-            assertEquals("Board A", fromDb.getName());
+            assertEquals("Board A", fromDb.getTitle());
         }
     }
 

@@ -19,7 +19,7 @@ public class Board {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private String name;
+    private String title;
 
     @OneToMany(
         mappedBy = "board",
@@ -30,8 +30,8 @@ public class Board {
 
     protected Board() {}
 
-    public Board(String name) {
-        this.name = name;
+    public Board(String title) {
+        this.title = title;
     }
 
     public void addColumn(BoardColumn column) {
@@ -43,8 +43,8 @@ public class Board {
         return id;
     }
 
-    public String getName(){
-        return name;
+    public String getTitle(){
+        return title;
     }
 
     public List<BoardColumn> getColumns(){

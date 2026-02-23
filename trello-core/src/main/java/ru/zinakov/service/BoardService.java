@@ -1,34 +1,36 @@
 package ru.zinakov.service;
 
 import jakarta.persistence.EntityManager;
-import jakarta.servlet.ServletContext;
+import jakarta.persistence.EntityManagerFactory;
 import ru.zinakov.domain.Board;
 import ru.zinakov.domain.BoardColumn;
 import ru.zinakov.domain.Card;
 import ru.zinakov.exception.BadRequestException;
 import ru.zinakov.exception.NotFoundException;
 import ru.zinakov.repository.BoardRepository;
-import ru.zinakov.util.JpaUtil;
-import ru.zinakov.web.dto.BoardResponse;
-import ru.zinakov.web.dto.CardResponse;
-import ru.zinakov.web.dto.ColumnResponse;
 
 public class BoardService {
-    private final BoardRepository repository = new BoardRepository();
+    private final EntityManagerFactory emf;
+    private final BoardRepository repository;
 
-    public Long createBoard(ServletContext context, String name) {
+    public BoardService(EntityManagerFactory emf) {
+        this.emf = emf;
+        this.repository = new BoardRepository();
+    }
+
+    public Long createBoard(String name) {
         if (name == null || name.isBlank()) {
             throw new BadRequestException("Board name cannot be empty");
         }
-        try (EntityManager em = JpaUtil.getEntityManager(context)) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
                 Board board = new Board(name);
-
                 repository.save(em, board);
 
                 em.getTransaction().commit();
                 return board.getId();
+
             } catch (Exception e) {
                 em.getTransaction().rollback();
                 throw e;
@@ -36,11 +38,11 @@ public class BoardService {
         }
     }
 
-    public void addColumn(ServletContext context, Long boardId, String title) {
+    public void addColumn(Long boardId, String title) {
         if (title == null || title.isBlank()) {
-            throw new BadRequestException("Board name cannot be empty");
+            throw new BadRequestException("Column title cannot be empty");
         }
-        try (EntityManager em = JpaUtil.getEntityManager(context)) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
                 Board board = repository.findById(em, boardId);
@@ -54,75 +56,57 @@ public class BoardService {
                 repository.save(em, board);
 
                 em.getTransaction().commit();
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 em.getTransaction().rollback();
                 throw e;
             }
         }
     }
 
-    /*
-     * public Board getBoard(ServletContext context, Long id) {
-     * try (EntityManager em = JpaUtil.getEntityManager(context)) {
-     * 
-     * em.getTransaction().begin();
-     * 
-     * Board board = em.find(Board.class, id);
-     * if (board == null) {
-     * throw new NotFoundException("Board not found");
-     * }
-     * 
-     * board.getColumns().size();
-     * board.getColumns().forEach(c -> c.getCards().size());
-     * 
-     * em.getTransaction().commit();
-     * 
-     * return board;
-     * }
-     * }
-     */
-
-    public BoardResponse getBoard(ServletContext context, Long id) {
-        try (EntityManager em = JpaUtil.getEntityManager(context)) {
-
+    public Board getBoardWithDetails(Long id) {
+        try (EntityManager em = emf.createEntityManager()) {
             Board board = repository.findWithDetails(em, id);
 
             if (board == null) {
                 throw new NotFoundException("Board not found");
             }
 
-            return mapToResponse(board);
+            return board;
         }
     }
 
-    private BoardResponse mapToResponse(Board board) {
-        BoardResponse br = new BoardResponse();
-        br.id = board.getId();
-        br.name = board.getName();
+    public BoardColumn getColumn(Long boardId, Long columnId) {
 
-        br.columns = board.getColumns().stream()
-                .map(c -> {
-                    ColumnResponse cr = new ColumnResponse();
-                    cr.id = c.getId();
-                    cr.title = c.getTitle();
+        try (EntityManager em = emf.createEntityManager()) {
 
-                    cr.cards = c.getCards().stream()
-                            .map(card -> {
-                                CardResponse cardResp = new CardResponse();
-                                cardResp.id = card.getId();
-                                cardResp.title = card.getTitle();
-                                return cardResp;
-                            }).toList();
+            BoardColumn column = repository.findColumn(em, boardId, columnId);
 
-                    return cr;
-                }).toList();
+            if (column == null) {
+                throw new NotFoundException("Column not found");
+            }
 
-        return br;
+            return column;
+        }
     }
 
-    public void deleteBoard(ServletContext context, Long id) {
-        try (EntityManager em = JpaUtil.getEntityManager(context)) {
+    public Card getCard(Long boardId,
+            Long columnId,
+            Long cardId) {
 
+        try (EntityManager em = emf.createEntityManager()) {
+
+            Card card = repository.findCard(em, boardId, columnId, cardId);
+
+            if (card == null) {
+                throw new NotFoundException("Card not found");
+            }
+
+            return card;
+        }
+    }
+
+    public void deleteBoard(Long id) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
                 Board board = em.find(Board.class, id);
@@ -133,18 +117,18 @@ public class BoardService {
                 em.remove(board);
 
                 em.getTransaction().commit();
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 em.getTransaction().rollback();
                 throw e;
             }
         }
     }
 
-    public void addCard(ServletContext context, Long boardId, Long columnId, String title) {
+    public void addCard(Long boardId, Long columnId, String title) {
         if (title == null || title.isBlank()) {
             throw new BadRequestException("Card title cannot be empty");
         }
-        try (EntityManager em = JpaUtil.getEntityManager(context)) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
                 Board board = repository.findById(em, boardId);
@@ -166,7 +150,7 @@ public class BoardService {
                 repository.save(em, board);
 
                 em.getTransaction().commit();
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 em.getTransaction().rollback();
                 throw e;
             }

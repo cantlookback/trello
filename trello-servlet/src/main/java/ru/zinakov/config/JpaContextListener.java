@@ -6,11 +6,10 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import static ru.zinakov.keys.ContextKeys.EMF;
 
 @WebListener
 public class JpaContextListener implements ServletContextListener {
-
-    private static final String EMF_KEY = "EMF";
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -18,14 +17,14 @@ public class JpaContextListener implements ServletContextListener {
                 Persistence.createEntityManagerFactory("trelloPU");
 
         ServletContext context = sce.getServletContext();
-        context.setAttribute(EMF_KEY, emf);
+        context.setAttribute(EMF, emf);
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         EntityManagerFactory emf =
                 (EntityManagerFactory) sce.getServletContext()
-                        .getAttribute(EMF_KEY);
+                        .getAttribute(EMF);
 
         if (emf != null) {
             emf.close();
